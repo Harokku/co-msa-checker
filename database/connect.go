@@ -57,11 +57,16 @@ func Connect() {
 							note      varchar                              not null,
 							status    boolean   default false,
 							operator  varchar                              not null,
-							priority  varchar                              not null
+							priority  varchar                              not null,
+							msa_id    uuid                                 not null
+								constraint infolist_msa_id_fk
+									references msa
+									on update cascade on delete cascade
 						);
 						
 						create unique index if not exists infolist_id_uindex
 							on infolist (id);
+
 `
 
 	_, err = DbConnection.Exec(sqlstatement)
@@ -101,7 +106,7 @@ func Connect() {
 								constraint msa_pk
 									primary key,
 							radiocode varchar                         not null,
-							plate     varchar,
+							plate     varchar						not null,
 							note      text
 						);
 						

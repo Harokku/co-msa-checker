@@ -55,7 +55,7 @@ func main() {
 	defer func(DbConnection *sql.DB) {
 		err := DbConnection.Close()
 		if err != nil {
-			log.Printf("WARNING:\tCannot close db pool connection, check for memory leak\terr:%v", err)
+			utils.LogDeferError("db connection", err)
 		}
 	}(database.DbConnection)
 

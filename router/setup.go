@@ -1,6 +1,9 @@
 package router
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"co-msa-checker/handler"
+	"github.com/gofiber/fiber/v2"
+)
 
 func Setup(app *fiber.App) {
 	// -------------------------
@@ -21,4 +24,19 @@ func Setup(app *fiber.App) {
 	v1.Get("/", func(ctx *fiber.Ctx) error {
 		return ctx.SendString("API version 1 root")
 	})
+
+	// -------------------------
+	// Fleet
+	// -------------------------
+	fleet := v1.Group("/fleet")
+	fleet.Get("/", handler.Fleet{}.GetAll)
+	fleet.Get("/:id", handler.Fleet{}.GetById)
+
+	// -------------------------
+	// Info List
+	// -------------------------
+	infolist := v1.Group("/info")
+	infolist.Get("/all/:id", handler.InfoList{}.GetllByMsaId)
+	infolist.Get("/updates/all/:id", handler.InfoList{}.GetAllUpdatesByInfoId)
+	infolist.Post("/updates/", handler.InfoList{}.PostUpdate)
 }
