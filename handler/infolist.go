@@ -85,3 +85,31 @@ func (f InfoList) PostUpdate(ctx *fiber.Ctx) error {
 		"data":      res,
 	})
 }
+
+func (f InfoList) PostInfo(ctx *fiber.Ctx) error {
+	var (
+		res database.Info
+		err error
+	)
+	u := new(database.Info)
+
+	// Read data from req body
+	if err := ctx.BodyParser(u); err != nil {
+		utils.Err(err)
+		return ctx.SendStatus(fiber.StatusBadRequest)
+	}
+
+	// Create new Info entry in DB
+	res, err = database.NewInfo(*u)
+	if err != nil {
+		utils.Err(err)
+		return ctx.SendStatus(fiber.StatusBadRequest)
+	}
+
+	return ctx.JSON(fiber.Map{
+		"status":    "success",
+		"message":   "Added new info",
+		"retrieved": 1,
+		"data":      res,
+	})
+}

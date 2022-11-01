@@ -37,6 +37,7 @@ func Setup(app *fiber.App) {
 	// -------------------------
 	infolist := v1.Group("/info")
 	infolist.Get("/all/:id", handler.InfoList{}.GetllByMsaId)
+	infolist.Post("/", handler.InfoList{}.PostInfo)
 	infolist.Get("/updates/all/:id", handler.InfoList{}.GetAllUpdatesByInfoId)
 	infolist.Post("/updates/", handler.InfoList{}.PostUpdate)
 }

@@ -48,7 +48,12 @@ func InfoGetAllByMsaId(id string) ([]Info, error) {
 		res          []Info
 	)
 
-	sqlStatement = `select id,timestamp,note,status,operator,priority from infolist where msa_id=$1 and status=false`
+	sqlStatement = `
+			select id,timestamp,note,status,operator,priority 
+			from infolist 
+			where msa_id=$1 and status=false
+			order by timestamp desc 
+`
 
 	rows, err = DbConnection.Query(sqlStatement, id)
 	if err != nil {
@@ -130,6 +135,28 @@ func NewUpdate(data Update) (Update, error) {
 	err = DbConnection.QueryRow(sqlStatement, data.InfoId, data.Note, data.Operator).Scan(&res.Id, &res.Timestamp)
 	if err != nil {
 		return Update{}, fmt.Errorf("error inserting record:\taddUpdate\t%w", err)
+	}
+
+	return res, nil
+}
+
+func NewInfo(data Info) (Info, error) {
+	var (
+		err          error
+		sqlStatement string
+		res          Info
+	)
+
+	res = data
+
+	sqlStatement = `
+		INSERT INTO infolist (note,operator,priority,msa_id)
+		VALUES ($1,$2,$3,$4)
+		RETURNING id,timestamp,status
+`
+	err = DbConnection.QueryRow(sqlStatement, data.Note, data.Operator, data.Priority, data.MsaId).Scan(&res.Id, &res.Timestamp, &res.Status)
+	if err != nil {
+		return Info{}, fmt.Errorf("error inserting record:\tNewInfp\t%w", err)
 	}
 
 	return res, nil
