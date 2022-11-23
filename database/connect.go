@@ -72,7 +72,7 @@ func Connect() {
 	// infolist table
 	sqlstatement = `create table if not exists infolist
 						(
-							id        uuid      default uuid_generate_v4() not null
+							id        uuid      default gen_random_uuid() not null
 								constraint infolist_pk
 									primary key,
 							timestamp timestamp default now()              not null,
@@ -99,7 +99,7 @@ func Connect() {
 	// updates table
 	sqlstatement = `create table if not exists updates
 						(
-							id         uuid      default uuid_generate_v4() not null
+							id         uuid      default gen_random_uuid() not null
 						constraint updates_pk
 						primary key,
 						info_id    uuid                                 not null
@@ -124,7 +124,7 @@ func Connect() {
 	// msa table
 	sqlstatement = `create table if not exists msa
 						(
-							id        uuid default uuid_generate_v4() not null
+							id        uuid default gen_random_uuid() not null
 								constraint msa_pk
 									primary key,
 							radiocode varchar                         not null,
