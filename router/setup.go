@@ -26,6 +26,12 @@ func Setup(app *fiber.App) {
 	})
 
 	// -------------------------
+	// Login
+	// -------------------------
+	login := v1.Group("/login")
+	login.Post("/", handler.User{}.Login)
+
+	// -------------------------
 	// Fleet
 	// -------------------------
 	fleet := v1.Group("/fleet")

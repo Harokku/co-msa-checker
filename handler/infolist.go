@@ -66,10 +66,18 @@ func (f InfoList) PostUpdate(ctx *fiber.Ctx) error {
 	u := new(database.Update)
 
 	// Read data from req body
-	if err := ctx.BodyParser(u); err != nil {
+	if err = ctx.BodyParser(u); err != nil {
 		utils.Err(err)
 		return ctx.SendStatus(fiber.StatusBadRequest)
 	}
+
+	// Check if operator id exist and substitute id with username
+	userDbData, err := checkUser(u.Operator)
+	if err != nil {
+		utils.Err(err)
+		return ctx.SendStatus(fiber.StatusUnauthorized)
+	}
+	u.Operator = userDbData.Username
 
 	// Create new Update entry in DB
 	res, err = database.NewUpdate(*u)
@@ -98,6 +106,14 @@ func (f InfoList) PostInfo(ctx *fiber.Ctx) error {
 		utils.Err(err)
 		return ctx.SendStatus(fiber.StatusBadRequest)
 	}
+
+	// Check if operator id exist and substitute id with username
+	userDbData, err := checkUser(u.Operator)
+	if err != nil {
+		utils.Err(err)
+		return ctx.SendStatus(fiber.StatusUnauthorized)
+	}
+	u.Operator = userDbData.Username
 
 	// Create new Info entry in DB
 	res, err = database.NewInfo(*u)

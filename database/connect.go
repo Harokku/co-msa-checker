@@ -47,6 +47,28 @@ func Connect() {
 	// Init DB if not already done
 	// -------------------------
 
+	// users table
+	sqlstatement = `create table if not exists users
+						(
+							id           uuid    default gen_random_uuid() not null
+								primary key,
+							username     varchar                           not null,
+							password     varchar                           not null,
+							manager_role boolean default false             not null
+						);
+						
+						comment on table users is 'Users table for auth';
+						
+						comment on column users.password is 'hashed pwd';
+						
+						comment on column users.manager_role is 'if user is a manager';
+
+`
+	_, err = DbConnection.Exec(sqlstatement)
+	if err != nil {
+		log.Fatalf(fmt.Sprintf("Error creating Document table: %v", err))
+	}
+
 	// infolist table
 	sqlstatement = `create table if not exists infolist
 						(
