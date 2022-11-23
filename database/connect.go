@@ -69,6 +69,26 @@ func Connect() {
 		log.Fatalf(fmt.Sprintf("Error creating Document table: %v", err))
 	}
 
+	// msa table
+	sqlstatement = `create table if not exists msa
+						(
+							id        uuid default gen_random_uuid() not null
+								constraint msa_pk
+									primary key,
+							radiocode varchar                         not null,
+							plate     varchar						not null,
+							note      text
+						);
+						
+						create unique index if not exists msa_id_uindex
+							on msa (id);
+`
+
+	_, err = DbConnection.Exec(sqlstatement)
+	if err != nil {
+		log.Fatalf(fmt.Sprintf("Error creating Document table: %v", err))
+	}
+
 	// infolist table
 	sqlstatement = `create table if not exists infolist
 						(
@@ -121,23 +141,4 @@ func Connect() {
 		log.Fatalf(fmt.Sprintf("Error creating Document table: %v", err))
 	}
 
-	// msa table
-	sqlstatement = `create table if not exists msa
-						(
-							id        uuid default gen_random_uuid() not null
-								constraint msa_pk
-									primary key,
-							radiocode varchar                         not null,
-							plate     varchar						not null,
-							note      text
-						);
-						
-						create unique index if not exists msa_id_uindex
-							on msa (id);
-`
-
-	_, err = DbConnection.Exec(sqlstatement)
-	if err != nil {
-		log.Fatalf(fmt.Sprintf("Error creating Document table: %v", err))
-	}
 }
