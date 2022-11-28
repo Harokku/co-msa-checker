@@ -46,4 +46,10 @@ func Setup(app *fiber.App) {
 	infolist.Post("/", handler.InfoList{}.PostInfo)
 	infolist.Get("/updates/all/:id", handler.InfoList{}.GetAllUpdatesByInfoId)
 	infolist.Post("/updates/", handler.InfoList{}.PostUpdate)
+
+	// -------------------------
+	// DataUpload
+	// -------------------------
+	upload := v1.Group("/upload")
+	upload.Post("/users", handler.User{}.CreateUsersFromXls)
 }

@@ -1,9 +1,10 @@
 package database
 
 import (
-	"crypto/sha256"
+	"co-msa-checker/utils"
 	"database/sql"
 	"fmt"
+	"github.com/lib/pq"
 )
 
 type User struct {
@@ -58,15 +59,12 @@ func GetUserDataByPassword(pw string) (User, error) {
 `
 	// old method with salting
 	//passwordHash, err = hashPassword(pw)
+	//if err != nil {
+	//	return User{}, fmt.Errorf("error calculating password hash")
+	//}
 
 	// new method with only hashing
-	h := sha256.New()
-	h.Write([]byte(pw))
-	passwordHash = fmt.Sprintf("%x", h.Sum(nil))
-
-	if err != nil {
-		return User{}, fmt.Errorf("error calculating password hash")
-	}
+	passwordHash = utils.Hash256(pw)
 
 	row = DbConnection.QueryRow(sqlStatement, passwordHash)
 	switch err = row.Scan(&res.Id, &res.Username, &res.ManagerRole); err {
@@ -77,4 +75,48 @@ func GetUserDataByPassword(pw string) (User, error) {
 	default:
 		return User{}, fmt.Errorf("error retrieving user data from db:\tGetUserDataByPassword\t%v", err)
 	}
+}
+
+func BulkCreate(newUsers []User) error {
+	var (
+		err          error
+		sqlStatement *sql.Stmt //Prepared sql statement
+		txn          *sql.Tx   //DB transaction
+	)
+
+	//Begin new transaction
+	txn, err = DbConnection.Begin()
+	if err != nil {
+		return err
+	}
+
+	//Prepare insert statement
+	sqlStatement, err = txn.Prepare(pq.CopyIn("users", "username", "password", "manager_role"))
+
+	//Exec insert for every passed document
+	for _, user := range newUsers {
+		_, err = sqlStatement.Exec(user.Username, user.Password, user.ManagerRole)
+		if err != nil {
+			return err
+		}
+	}
+
+	//Flush actual data
+	_, err = sqlStatement.Exec()
+	if err != nil {
+		return err
+	}
+
+	err = sqlStatement.Close()
+	if err != nil {
+		return err
+	}
+
+	//Execute transaction
+	err = txn.Commit()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

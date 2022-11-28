@@ -1,8 +1,11 @@
 package database
 
 import (
+	"co-msa-checker/utils"
 	"fmt"
+	"github.com/xuri/excelize/v2"
 	"golang.org/x/crypto/bcrypt"
+	"io"
 )
 
 // TruncateTable Truncate (clean) actual table
@@ -36,4 +39,54 @@ func hashPassword(password string) (string, error) {
 func checkPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
+}
+
+type Xls struct {
+}
+
+func (x Xls) BuildUsers(inputStream io.Reader) ([]User, error) {
+	var (
+		res []User
+	)
+
+	f, err := excelize.OpenReader(inputStream)
+	if err != nil {
+		return nil, err
+	}
+
+	usersSheet, err := f.GetRows("utenti")
+	if err != nil {
+		return nil, err
+	}
+
+	for i, user := range usersSheet {
+		// Skip 1st row, contain only column header for xlsx human readability
+		if i > 0 {
+			var u User
+			var randomPw string
+			var hashedPw string
+
+			u.Username = user[0]
+
+			// Generate new random password and hash it
+			randomPw, _ = utils.NewPw(8) // TODO: Check for error
+			hashedPw = utils.Hash256(randomPw)
+			u.Password = hashedPw
+
+			// Add plain password to xlsx row
+			f.SetCellValue("utenti", fmt.Sprintf("C%d", i+1), randomPw)
+
+			// Cast xlsx text to boolean
+			if user[1] == "TRUE" {
+				u.ManagerRole = true
+			}
+
+			res = append(res, u)
+		}
+	}
+
+	// TODO: implement in memory response to avoid temporary disk access
+	f.SaveAs("Utenti.xlsx")
+
+	return res, nil
 }
