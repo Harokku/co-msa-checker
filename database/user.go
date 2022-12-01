@@ -77,7 +77,7 @@ func GetUserDataByPassword(pw string) (User, error) {
 	}
 }
 
-func BulkCreate(newUsers []User) error {
+func BulkCreateUser(newUsers []User) error {
 	var (
 		err          error
 		sqlStatement *sql.Stmt //Prepared sql statement

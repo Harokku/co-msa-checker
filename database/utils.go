@@ -90,3 +90,37 @@ func (x Xls) BuildUsers(inputStream io.Reader) ([]User, error) {
 
 	return res, nil
 }
+
+func (x Xls) BuildFleet(inputStream io.Reader) ([]Fleet, error) {
+	var (
+		res []Fleet
+	)
+
+	f, err := excelize.OpenReader(inputStream)
+	if err != nil {
+		return nil, err
+	}
+
+	fleetSheet, err := f.GetRows("msa")
+	if err != nil {
+		return nil, err
+	}
+
+	for i, msa := range fleetSheet {
+		// Skip 1st row, contain only column header for xlsx human readability
+		if i > 0 {
+			var m Fleet
+
+			m.Radiocode = msa[0]
+			m.Plate = msa[1]
+			// Since "note" field can be blank, check if slice item is populated
+			if len(msa) > 2 {
+				m.Note = msa[2]
+			}
+
+			res = append(res, m)
+		}
+	}
+
+	return res, nil
+}

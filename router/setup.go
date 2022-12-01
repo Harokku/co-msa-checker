@@ -52,4 +52,5 @@ func Setup(app *fiber.App) {
 	// -------------------------
 	upload := v1.Group("/upload")
 	upload.Post("/users", handler.User{}.CreateUsersFromXls)
+	upload.Post("/fleet", handler.Fleet{}.CreateFleetFromXls)
 }

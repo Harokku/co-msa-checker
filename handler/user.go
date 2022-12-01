@@ -45,6 +45,7 @@ func (u User) CreateUsersFromXls(ctx *fiber.Ctx) error {
 		//writer     io.Writer
 		err error
 	)
+
 	// Get first file from form field "document":
 	file, err = ctx.FormFile("config")
 	if err != nil {
@@ -60,7 +61,7 @@ func (u User) CreateUsersFromXls(ctx *fiber.Ctx) error {
 		return ctx.SendStatus(fiber.StatusBadRequest)
 	}
 
-	err = database.BulkCreate(newUsers)
+	err = database.BulkCreateUser(newUsers)
 	if err != nil {
 		utils.Err(err)
 		return ctx.SendStatus(fiber.StatusBadRequest)

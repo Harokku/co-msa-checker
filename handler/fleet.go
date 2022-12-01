@@ -5,6 +5,7 @@ import (
 	"co-msa-checker/utils"
 	"database/sql"
 	"github.com/gofiber/fiber/v2"
+	"mime/multipart"
 )
 
 type Fleet struct {
@@ -54,4 +55,36 @@ func (f Fleet) GetById(ctx *fiber.Ctx) error {
 	default:
 		return ctx.SendStatus(fiber.StatusInternalServerError)
 	}
+}
+
+func (f Fleet) CreateFleetFromXls(ctx *fiber.Ctx) error {
+	var (
+		file       *multipart.FileHeader
+		readedFile multipart.File
+		//writer     io.Writer
+		err error
+	)
+
+	// Get first file from form field "document":
+	file, err = ctx.FormFile("config")
+	if err != nil {
+		utils.Err(err)
+		return ctx.SendStatus(fiber.StatusBadRequest)
+	}
+	readedFile, err = file.Open()
+
+	// Read uploaded file content and build fleet table
+	newFleet, err := database.Xls{}.BuildFleet(readedFile)
+	if err != nil {
+		utils.Err(err)
+		return ctx.SendStatus(fiber.StatusBadRequest)
+	}
+
+	err = database.BulkCreateFleet(newFleet)
+	if err != nil {
+		utils.Err(err)
+		return ctx.SendStatus(fiber.StatusBadRequest)
+	}
+
+	return ctx.SendStatus(fiber.StatusOK)
 }
